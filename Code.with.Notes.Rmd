@@ -1,0 +1,556 @@
+---
+title: "Code for Class, Augmented with my Notes"
+author: "Chris Coffee"
+date: "6/7/2019"
+output: html_document
+---
+
+## All the packages we used during class are installed in the first chunk. 
+- We could also have installed them through the "Packages" tab on the right.
+```{r setup, include=FALSE}
+install.packages(c("BiocManager", "knitr", "RColorBrewer", "readxl")) # best one to read Excel files
+BiocManager::install(c("DESeq2","edgeR","qvalue"))
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=TRUE}
+getwd()
+orig_path = getwd()
+setwd(paste(orig_path, "/to_upload_to_RStudio", sep = ""))
+getwd()
+```
+## This is just some code we played around with the first day or so.
+
+```{r, echo=TRUE}
+a <- "Hello"
+a = "Hello"
+print(a)
+a <- "2"
+#b <- a * 2
+a <- c(1:100)
+a
+cat(a)
+a <- "Hello"
+b <- "world"
+cat(paste(a,b, sep = ""))
+c <- c(a,b)
+str(c)
+a <- 2
+b <- "2"
+class(a)
+class(b)
+a * 2
+#b * 2
+2
+2.0
+as.numeric(b) * 2
+??as.numeric()
+?cat()
+x <- c(1:100)
+x[99] <- 999
+
+l <- list()
+l[[1]] <- "Hello"
+l[[2]] <- 2
+l[[3]] <- c(1:1000)
+l[[3]][99]
+l <- list(a = "Hello", b=2)
+l[[1]]
+l[["a"]]
+f <- factor()
+
+length(l)
+x <- c(5000:6000)
+length(x)
+
+for (i in 1:length(x)) {
+  x[i] <- x[i] + 49
+  #cat(a, sep="\n")
+}
+x+49
+x <- x +49
+```
+
+## This is when we started using the iris dataset.
+## **Note that I renamed _split_data_ to _splitBySpecies_.**
+
+```{r, echo=TRUE}
+data("iris")
+head(iris)
+dim(iris)
+row.names(iris)
+row.names(iris) <- as.numeric(row.names(iris)) + 49
+names(iris)
+iris[1,1]
+
+dim(iris)[2]
+iris$Species
+unique(iris$Species)
+levels(iris$Species)
+levels(iris$Sepal.Length)
+as.character(iris$Species)
+
+splitBySpecies <- split(iris, f = iris$Species)
+splitBySpecies[[1]]
+splitBySpecies[["setosa"]] # don't depend on weird behavior of R; use double brackets!
+mean(splitBySpecies[["setosa"]]$Petal.Width)
+n_species = length(splitBySpecies)
+
+for (i in 1:n_species) {
+  df <- splitBySpecies[[i]]
+  pw <- df$Petal.Width
+  x <- mean(pw)
+  species = names(splitBySpecies)
+  cat(species[i], x, "\n")
+}
+```
+
+## This is from when we started using functions. I included both the code from class as well as my own version.
+
+### from class
+```{r, echo=TRUE}
+myfunction <-
+  function ( x, col_name = "Petal.Width") {
+    return( mean(x[[col_name]]) )
+}
+
+result <- myfunction(splitBySpecies[[1]])
+result_vector <- vector()
+
+for (i in 1:length(splitBySpecies)) {
+  result <- myfunction(splitBySpecies[[i]], "Sepal.Length")
+  result_vector[i] <- result
+}
+
+result_list <- sapply(splitBySpecies, myfunction)
+
+name_vector <- names(iris)
+name_vector == "Sepal.Length"
+
+numbers <- c(1:1000)
+numbers [numbers > 500]
+
+which( name_vector == "Sepal.Length")
+
+df <- splitBySpecies[[1]]
+View(df)
+df[,3]
+df[,which(names(iris) == "Petal.Width")]
+
+v <- c(1,2,3, NA, 5, 6)
+v[!is.na(v)]
+```
+
+### my version
+```{r, echo=TRUE}
+rstrefdgdfsg <-
+  function ( x, col_name = "Petal.Width" ) {
+    return(mean(x[[col_name]]))
+  }
+
+name_vector <- names(iris)
+name_vector == "Sepal.Length"
+
+df <- splitBySpecies[[1]]
+View(df)
+
+numbers <- c(1:1000)
+numbers[numbers > 500]
+
+#df[,which(substr(names(iris),1,5) == "Petal")]
+
+result = list(vector(), vector())
+for (i in 1:length(splitBySpecies)) {
+  result[[1]][i] <- name_vector[[i]]
+  result[[2]][i] <- rstrefdgdfsg(splitBySpecies[[i]])
+}
+result
+
+"sapply"
+sapply(splitBySpecies,rstrefdgdfsg)
+"lapply"
+lapply(splitBySpecies,rstrefdgdfsg)
+
+v <- c(1,2,3,NA,5,6)
+mean(v[!is.na(v)])
+```
+
+## myiris
+
+```{r, echo=TRUE}
+iris
+
+write.table(iris, file = gzfile("myiris.txt.gz"), row.names = F, quote = F, sep = "\t")
+
+getwd()
+#setwd("/home/malay/Downloads")
+#getwd()
+
+myiris <- read.table("myiris.txt.gz", header = T)
+myiris
+
+a=c(1,2)
+b=c(3,4)
+c=c(5,6)
+m <- data.frame()
+rbind(a,b,c)
+cbind(a,b,c)
+
+set.seed(12345)
+r <- rnorm(50)
+mean(r)
+hist(r)
+plot(density(r))
+     
+plot(iris)
+```
+
+## RColorBrewer
+
+```{r, echo=TRUE}
+library(RColorBrewer)
+# rcolorplot journal ggplot - journals user their own color scheme
+#display.brewer.all()
+# fix color pad at beginning 
+nicecolors <- brewer.pal(3, "Pastel2")
+set.seed(1235)
+
+a <- c(1,2)
+b <- c(3,4)
+c <- c(5,6)
+df <- data.frame(a, b, c)
+df2 <- rbind(a, b, c)
+df3 <- cbind(a, b, c)
+df
+df2
+df3
+m <- matrix(1:6, nrow=2, ncol=3)
+normal <- rnorm(n = 50, sd = 3, mean = 5)
+uniform <- runif(n = 50, min = 4, max = 7)
+poisson <- rpois(n = 50, lambda = 2)
+df = data.frame(normal, uniform, poisson)
+plot(df)
+d = density(x = normal)
+
+plot(iris) # bunch of scatterplots; used for visually clustering
+
+# this goes BEFORE what you what to go in the file!
+pdf(file = "test.pdf", width = 8.5, height = 11) # don't use these values (will crop)
+par(mfrow=c(1,2),pty="s")
+plot(iris$Sepal.Length, iris$Sepal.Width,xlab = "Sepal length",
+     ylab = "Sepal width", main="Some data",
+     ylim = c(0, max(iris$Petal.Length)),
+     pch=16,col=nicecolors[1]
+     )
+#?pch
+points(iris$Sepal.Length, iris$Petal.Length, col=nicecolors[2],pch=16)
+legend("topleft", legend=c("Sepal width", "Petal length"), 
+       col=c(nicecolors[1],nicecolors[2]), pch=16)
+plot(iris$Sepal.Length, iris$Sepal.Width,xlab = "Sepal length",
+     ylab = "Sepal width", main="Some data",
+     ylim = c(0, max(iris$Petal.Length)),
+     pch=16,col=nicecolors[1]
+)
+dev.off() # must include this or file will be corrupted!
+
+#png()
+#svg()
+#tiff()
+
+```
+
+## Subsets, etc.
+
+```{r, echo=TRUE}
+subset_iris <- iris[, 1:4]
+pdf ("looping_plot.pdf", height=11, width=8.5)
+par(mfrow=c(4,4))
+for (i in 1:dim(subset_iris)[2]) {
+  for (j in 1:dim(subset_iris)[2]) {
+    plot(subset_iris[,i], subset_iris[,j])
+  }
+}
+dev.off()
+x <- myiris$Sepal.Length[1:50]
+y <- myiris$Sepal.Width[1:50]
+
+plot(x,y)
+o <- order(x)
+lines(x[o],y[o])
+
+hist(x)
+plot(density(x))
+
+boxplot(iris$Sepal.Width)
+summary(x)
+
+iris$Species == "virginica"
+mean_vir <- mean(iris[iris$Species == "virginica", ]$Sepal.Length)
+mean_set <- mean(iris[iris$Species == "setosa", ]$Sepal.Length)
+t.test(iris[iris$Species == "virginica", ]$Sepal.Length,
+       iris[iris$Species == "setosa", ]$Sepal.Length,
+       alternative = "two.sided")
+boxplot(iris[iris$Species == "virginica", ]$Sepal.Length,
+        iris[iris$Species == "setosa", ]$Sepal.Length)
+
+
+data(mtcars)
+counts <- table(mtcars$gear)
+barplot(counts, horiz = T)
+counts <- table(mtcars$gear,mtcars$cyl)
+barplot(counts, beside = T)
+transform_iris <- t(iris)
+#View(transform_iris)
+
+# Mean sepal length for each species
+
+l <- split (iris, iris$Species)
+mean_sepal <- sapply(l , function(x) {
+  mean(x$Sepal.Length)
+})
+mean_petal <- sapply(l , function(x) {
+  mean(x$Petal.Length)
+})
+
+df_barplot <- rbind(mean_sepal, mean_petal)
+barplot(df_barplot,beside = T,legend=rownames(df_barplot))
+
+plot(iris$Sepal.Length, iris$Petal.Length)
+cor_test <- cor.test(iris$Sepal.Length, 
+                     iris$Petal.Length,
+                     alternative = "two.sided", 
+                     method="pearson")
+cor_test
+cor_test$p.value
+cor_test$estimate
+summary(cor_test)
+
+plot(iris$Petal.Length, iris$Sepal.Length)
+m <- lm(iris$Sepal.Length~iris$Petal.Length)
+abline(m)
+
+b <- barplot(df_barplot[1,])
+sd_sepal_length <- sapply(l, function(x) {
+  sd(x$Sepal.Length)
+})
+
+barplot(df_barplot[1,], ylim=c(0,6.5))
+arrows(x0=b[,1],y0=df_barplot[1,] + sd_sepal_length,
+       x1=b[,1],y1=df_barplot[1,] - sd_sepal_length,
+       code = 3, angle=90)
+
+```
+
+## normalization work we did in class
+
+```{r, echo=TRUE}
+#====================
+# RNASEQ
+#====================
+
+# I just manually imported the file.
+counts <- read.table("nagalakshmi_count_table.txt", 
+                     header = T)
+rownames(counts) <- counts$gene
+counts <- counts[, -1]
+boxplot(counts)
+counts$sum <- apply(counts,MARGIN = 1, FUN = sum)
+counts <- counts[counts$sum !=0, ]
+counts <- counts[, -5]
+counts_median_normalized <- counts
+medians <- sapply(counts,median)
+for (i in 1:dim(counts)[2]) {
+  counts_median_normalized[,i] <- counts[,i] / medians[i]
+}
+#counts_median_normalized <- counts / sapply(counts, median)
+boxplot(counts_median_normalized, outline = F)
+
+# upper quartile normalization
+uq <- sapply(counts,function(x) {
+  quantile(x[x !=0], 0.75) }
+  )
+counts_uq <- counts
+for (i in 1:dim(counts)[2]) {
+  counts_uq[,i] <- counts[,i] / uq[i]
+}
+boxplot(counts_uq, outline = F)
+```
+
+```{r, echo=TRUE}
+
+###################
+# Reading file
+###################
+# Manually imported again.
+data <- read.table("pnas_expression.txt",header=T)
+
+######### Reading excel file ################
+library(readxl)
+#read_xlsx()
+###############################
+```
+
+## cool aside about bioconductor, etc
+
+```{r, echo=TRUE}
+
+
+# learn about workflows via bioconductor.org/packages/release/BiocView.html#__Workflow
+# can get your own workflow going, everal available
+
+# '::' == namespace
+# these two dont match for small diff expressions
+### suggestion: use edgeR (more scientific, less conservative)
+### DESeq2 produces differences that are guaranteed to be differences
+### uq normalization uses tmm (edgeR) normalization, otherwise don't use it
+### varies by lab preference
+browseVignettes(package = "edgeR")
+??edgeR # gives all package help info
+
+# edgeR.pdf isnt helpful, but edgeRUsersGuide.pdf is sweet
+
+# vignettes are cool and they refer to user guides
+# browse on web, or browseVinettes(edgeR)
+### (just do it on web)
+####
+
+```
+
+```{r, echo=TRUE}
+############## Reading commadline ##########
+
+args <- commandArgs(trailingOnly = T)
+args[1]
+#read.table(args[1])
+
+#################### Differential expression
+setwd("~/") #setwd("~/info510/")
+getwd()
+data <- read.table("pnas_expression.txt",header=T)
+rownames(data) <- data$ensembl_ID
+data <- data[,-1]
+data <- data[, -8]
+names(data) <- c("C1","C2","C3","T1","T2","T3","T4")
+names
+```
+
+## Asides:
+
+### logFC:
+- logFC uses log base 2
+- overexpressed in control vs treatment
+- groups data == factor, i.e. labels (C == 1 == control, T == 2 == treatment)
+- logFC is 2 / 1
+- can you just name 0 as control, 1 as treatment was present
+  - just be careful with factors, kids.
+  
+### FDR: <.05 cutoff
+
+## edgeR
+```{r, echo=TRUE}
+## EdgeR ###
+library(edgeR)
+
+# 99% of time you use already existing structure?
+
+groups <- c(rep("C",3), rep("T",4)) # vector contain 3 C's and 4 T's
+
+# count data set
+# dont needto know what data structure looks like
+cds <- DGEList(data, group=groups)
+cds <- calcNormFactors(cds)
+
+d <- cds@.Data[[2]] #cds$counts[[2]]
+d # normalizes against all other samples? (see edgeR manual for details)
+
+normalization_factors <- d$norm.factors
+design <- model.matrix(~groups)
+y <- estimateDisp(cds,design)
+fit <- glmQLFit(y, design)
+qlf <- glmQLFTest(fit, coef=2)
+
+topTags(qlf)
+
+
+??qvalue
+```
+
+## DESeq2 and example of data exploration technique (PCA)
+
+```{r, echo=TRUE}
+
+# DESeq2
+library(DESeq2)
+# groups data is given as a dataframe [or, rather, save as dataframe?]
+coldata <- data.frame(condition=groups)
+dds <- DESeqDataSetFromMatrix(data, colData = coldata, design = ~condition)
+# when you calc norm factors, you are saving back into the dataframe,
+# otherwise it's not saved
+dds <- estimateSizeFactors(dds)
+sizeFactors(dds) # these are the scaling factors
+
+# IMPORTANT:
+# for edgeR(right?), you're normalizing against a particular reference sample
+# do incremental normalization-based tables
+# keep reference constant, wont need to renormalize
+# THIS DOES NOT APPLY TO DESEQ DUE TO GEOMEAN DENOM - must renorm every time
+head(counts(dds, normalized=T)) # cant get this from edgeR; no special factor to get normalized data out
+# deseq is expecting count (ie integer) format if you normalize (uq)
+# we'll see example in adrenal
+
+dds <- DESeq(dds)
+results <- results(dds)
+results
+write.table(results, file="deseq_results.txt")
+# will probably need to filter by hand
+
+### note on deseq:
+### geomean doesn't make sense with zeros, so you have to add an artificial value to each number.
+### this is lame.
+
+
+plotMA(results)
+
+# data exploration techniques:
+# pca - most used
+# nonneg matrix fact
+# indep ca
+# pls (partial least squares?)
+# mds
+
+# tsne = not a technique like above
+
+# PCA
+
+data
+data <- data + 1
+data <- log2(data)
+data <- t(data)
+#View(data)
+# don't View!!! It will take forever!!!
+names(data)
+dim(data)
+
+d.pca <- prcomp(data)
+plot(d.pca)
+summary(d.pca)
+str(d.pca)
+d.pca$x
+plot(d.pca$x[,1], d.pca$x[,2], col=c("black","black","black",
+                                     rep("red",4))) # the following only works for ggplot: col=row.names(data))
+# oops...one of them is an outlier (upper right)
+# should have done 3-4, but we did 4-3
+
+# see pdf to get back eigenvalues.
+# percent of var explained is important
+# 
+
+
+### now you're 80% of the way there!
+### do it ina day, say it takes a weeek, everyone el
+
+## Sort results based on p-value.
+#results<- results[order(results$padj),]
+#results
+
+```
