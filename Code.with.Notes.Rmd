@@ -159,7 +159,7 @@ numbers[numbers > 500]
 
 #df[,which(substr(names(iris),1,5) == "Petal")]
 
-result = list(vector(), vector())
+result <- list(vector(), vector())
 for (i in 1:length(splitBySpecies)) {
   result[[1]][i] <- name_vector[[i]]
   result[[2]][i] <- rstrefdgdfsg(splitBySpecies[[i]])
