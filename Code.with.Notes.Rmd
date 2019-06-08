@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo=TRUE}
 getwd()
-orig_path = getwd()
+orig_path <- getwd()
 setwd(paste(orig_path, "/to_upload_to_RStudio", sep = ""))
 getwd()
 ```
@@ -94,13 +94,13 @@ splitBySpecies <- split(iris, f = iris$Species)
 splitBySpecies[[1]]
 splitBySpecies[["setosa"]] # don't depend on weird behavior of R; use double brackets!
 mean(splitBySpecies[["setosa"]]$Petal.Width)
-n_species = length(splitBySpecies)
+n_species <- length(splitBySpecies)
 
 for (i in 1:n_species) {
   df <- splitBySpecies[[i]]
   pw <- df$Petal.Width
   x <- mean(pw)
-  species = names(splitBySpecies)
+  species <- names(splitBySpecies)
   cat(species[i], x, "\n")
 }
 ```
